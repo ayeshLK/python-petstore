@@ -1,0 +1,9 @@
+apiVersion: core.choreo.dev/v1beta1
+kind: ComponentConfig
+spec:
+  inbound:
+    - name: Petstore API
+      port: 8000
+      type: REST
+      networkVisibility: Public
+      schemaFilePath: openapi.yaml

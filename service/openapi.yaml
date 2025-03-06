@@ -1,0 +1,253 @@
+openapi: 3.1.0
+info:
+  title: FastAPI
+  version: 0.1.0
+paths:
+  /pets:
+    post:
+      summary: Add New Pet
+      description: |-
+        Add a new pet to the system.
+
+        - **Request Body:** Pet details (name, category, photo URLs, tags)
+        - **Response:** Returns the newly assigned pet ID.
+        - **Default Status:** The pet is marked as `available` upon creation.
+      operationId: add_new_pet_pets_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pet'
+        required: true
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: integer
+                title: Response Add New Pet Pets Post
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /pets/findByStatus:
+    get:
+      summary: Find Pets By Status
+      description: |-
+        Find pets by status.
+
+        - **Query Parameter:** `status` (available, pending, or sold)
+        - **Response:** Returns a list of pets matching the given status.
+      operationId: find_pets_by_status_pets_findByStatus_get
+      parameters:
+        - name: status
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Status'
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pet'
+                title: Response Find Pets By Status Pets Findbystatus Get
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /pets/findByTags:
+    get:
+      summary: Find Pets By Tags
+      description: |-
+        Find pets by tags.
+
+        - **Query Parameter:** `tags` (List of strings)
+        - **Response:** Returns a list of pets containing any of the specified tags.
+      operationId: find_pets_by_tags_pets_findByTags_get
+      requestBody:
+        content:
+          application/json:
+            schema:
+              items:
+                type: string
+              type: array
+              title: Tags
+        required: true
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Pet'
+                type: array
+                title: Response Find Pets By Tags Pets Findbytags Get
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /pets/{pet_id}:
+    get:
+      summary: Find Pet By Id
+      description: |-
+        Find a pet by its ID.
+
+        - **Path Parameter:** `pet_id` (integer)
+        - **Response:** Returns the pet details if found.
+        - **Error Handling:** Returns `404 Not Found` if the pet does not exist.
+      operationId: find_pet_by_id_pets__pet_id__get
+      parameters:
+        - name: pet_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Pet Id
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      summary: Delete Pet By Id
+      description: |-
+        Delete a pet by its ID.
+
+        - **Path Parameter:** `pet_id` (integer)
+        - **Response:** Confirms deletion of the pet.
+        - **Error Handling:** If the pet ID is not found, no action is taken.
+      operationId: delete_pet_by_id_pets__pet_id__delete
+      parameters:
+        - name: pet_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Pet Id
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: string
+                title: Response Delete Pet By Id Pets  Pet Id  Delete
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /:
+    get:
+      summary: Root
+      operationId: root__get
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+components:
+  schemas:
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    Pet:
+      properties:
+        id:
+          anyOf:
+            - type: integer
+            - type: "null"
+          title: Id
+          description: Unique identifier for the pet
+        name:
+          type: string
+          title: Name
+          description: Name of the pet
+        category:
+          anyOf:
+            - type: string
+            - type: "null"
+          title: Category
+          description: Category of the pet (e.g., dog, cat, bird)
+        photoUrls:
+          items:
+            type: string
+          type: array
+          title: Photourls
+          description: List of photo URLs for the pet
+        tags:
+          anyOf:
+            - items:
+                type: string
+              type: array
+            - type: "null"
+          title: Tags
+          description: Tags describing the pet (e.g., friendly, small)
+        status:
+          anyOf:
+            - $ref: '#/components/schemas/Status'
+            - type: "null"
+          description: Current status of the pet
+      type: object
+      required:
+        - name
+        - photoUrls
+      title: Pet
+      description: Represents a pet in the system.
+    Status:
+      type: string
+      enum:
+        - available
+        - pending
+        - sold
+      title: Status
+      description: Enum representing the status of a pet.
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+              - type: string
+              - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+        - loc
+        - msg
+        - type
+      title: ValidationError
